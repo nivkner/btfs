@@ -107,7 +107,9 @@ jump(int piece, int size) {
 
 static void
 advance() {
-	jump(cursor, 0);
+	if(!params.lazy_fetch) {
+		jump(cursor, 0);
+	}
 }
 
 Read::Read(char *buf, int index, off_t offset, size_t size) {
@@ -118,6 +120,10 @@ Read::Read(char *buf, int index, off_t offset, size_t size) {
 #else
 	int64_t file_size = ti->files().file_size(index);
 #endif
+
+	if (params.lazy_fetch == 1) {
+		handle.file_priority(index, 1);
+	}
 
 	while (size > 0 && offset < file_size) {
 		libtorrent::peer_request part = ti->map_file(index, offset,
@@ -183,8 +189,15 @@ int Read::read() {
 	// Trigger reads of finished pieces
 	trigger();
 
-	// Move sliding window to first piece to serve this request
-	jump(parts.front().part.piece, size());
+	if (params.lazy_fetch) {
+		// Set priority of needed pieces
+		for (parts_iter i = parts.begin(); i != parts.end(); ++i) {
+			handle.piece_priority(i->part.piece, 7);
+		}
+	} else {
+		// Move sliding window to first piece to serve this request
+		jump(parts.front().part.piece, size());
+	}
 
 	while (!finished() && !failed)
 		// Wait for any piece to downloaded
@@ -205,8 +218,16 @@ setup() {
 	if (params.browse_only)
 		handle.pause();
 
+	if(params.lazy_fetch == 2) {
+		std::vector<libtorrent::download_priority_t> priorities(ti->num_pieces());
+		handle.prioritize_pieces(priorities);
+	}
+
 	for (int i = 0; i < ti->num_files(); ++i) {
 		std::string parent("");
+		if (params.lazy_fetch == 1) {
+			handle.file_priority(i, 0);
+		}
 
 #if LIBTORRENT_VERSION_NUM < 10100
 		char *p = strdup(ti->file_at(i).path.c_str());
@@ -947,6 +968,7 @@ static const struct fuse_opt btfs_opts[] = {
 	BTFS_OPT("--max-port=%lu",               max_port,             4),
 	BTFS_OPT("--max-download-rate=%lu",      max_download_rate,    4),
 	BTFS_OPT("--max-upload-rate=%lu",        max_upload_rate,      4),
+	BTFS_OPT("--lazy-fetch=%lu",             lazy_fetch,           4),
 	FUSE_OPT_END
 };
 
@@ -985,6 +1007,7 @@ print_help() {
 	printf("    --max-port=N           end of listen port range\n");
 	printf("    --max-download-rate=N  max download rate (in kB/s)\n");
 	printf("    --max-upload-rate=N    max upload rate (in kB/s)\n");
+	printf("    --lazy-fetch=LEVEL     fetch only on initial access, higher LEVEL means finer granularity\n");
 }
 
 int
