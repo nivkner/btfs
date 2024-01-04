@@ -45,6 +45,12 @@ maximum download rate (in kilobytes per second)
 .TP
 \fB\-\-max-upload-rate=\fIRATE\fR
 maximum upload rate (in kilobytes per second)
+.TP
+\fB\-\-lazy-fetch=\fILEVEL\fR
+fetch only on initial access, higher LEVEL means finer granularity:
+  - 0 all files are prefetched eagerly.
+  - 1 an entire file is prefetched on first access.
+  - 2 only the required pieces from the file are fetched on every access.
 .SH EXAMPLES
 mounting a torrent file:
   btfs video.torrent ~/mnt
