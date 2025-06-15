@@ -191,8 +191,18 @@ int Read::read() {
 
 	if (params.lazy_fetch) {
 		// Set priority of needed pieces
+		auto ti = handle.torrent_file();
 		for (parts_iter i = parts.begin(); i != parts.end(); ++i) {
-			handle.piece_priority(i->part.piece, 7);
+			int piece = static_cast<int>(i->part.piece);
+			handle.piece_priority(piece, 7);
+
+			int read_ahead = ((params.read_ahead << 20) / ti->piece_length());
+			int last_piece = static_cast<int>(ti->last_piece());
+			int extra_pieces = std::min(read_ahead, last_piece - piece);
+			for (int j = 1; j < extra_pieces; j++) {
+				auto cur_priority = static_cast<int>(handle.piece_priority(piece + j));
+				handle.piece_priority(piece + j, std::max(1, cur_priority));
+			}
 		}
 	} else {
 		// Move sliding window to first piece to serve this request
@@ -969,6 +979,7 @@ static const struct fuse_opt btfs_opts[] = {
 	BTFS_OPT("--max-download-rate=%lu",      max_download_rate,    4),
 	BTFS_OPT("--max-upload-rate=%lu",        max_upload_rate,      4),
 	BTFS_OPT("--lazy-fetch=%lu",             lazy_fetch,           4),
+	BTFS_OPT("--read-ahead=%lu",             read_ahead,           4),
 	FUSE_OPT_END
 };
 
@@ -1008,6 +1019,7 @@ print_help() {
 	printf("    --max-download-rate=N  max download rate (in kB/s)\n");
 	printf("    --max-upload-rate=N    max upload rate (in kB/s)\n");
 	printf("    --lazy-fetch=LEVEL     fetch only on initial access, higher LEVEL means finer granularity\n");
+	printf("    --read-ahead=N         number of megabytes to read ahead of the requested pieces\n");
 }
 
 int

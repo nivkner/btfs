@@ -132,6 +132,7 @@ struct btfs_params {
 	int max_upload_rate;
 	const char *metadata;
 	int lazy_fetch;
+	int read_ahead;
 };
 
 }
