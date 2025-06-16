@@ -973,6 +973,7 @@ static const struct fuse_opt btfs_opts[] = {
 	BTFS_OPT("-s",                           silent,               1),
 	BTFS_OPT("--silent",                     silent,               1),
 	BTFS_OPT("--utp-only",                   utp_only,             1),
+	BTFS_OPT("-d %s",                        data_directory,       4),
 	BTFS_OPT("--data-directory=%s",          data_directory,       4),
 	BTFS_OPT("--min-port=%lu",               min_port,             4),
 	BTFS_OPT("--max-port=%lu",               max_port,             4),
@@ -1006,20 +1007,20 @@ print_help() {
 	printf("usage: " PACKAGE " [options] metadata mountpoint\n");
 	printf("\n");
 	printf("btfs options:\n");
-	printf("    --version -v           show version information\n");
-	printf("    --help -h              show this message\n");
-	printf("    --help-fuse            print all fuse options\n");
-	printf("    --browse-only -b       download metadata only\n");
-	printf("    --keep -k              keep files after unmount\n");
-	printf("    --silent -s            do not create logs\n");
-	printf("    --utp-only             do not use TCP\n");
-	printf("    --data-directory=dir   directory in which to put btfs data\n");
-	printf("    --min-port=N           start of listen port range\n");
-	printf("    --max-port=N           end of listen port range\n");
-	printf("    --max-download-rate=N  max download rate (in kB/s)\n");
-	printf("    --max-upload-rate=N    max upload rate (in kB/s)\n");
-	printf("    --lazy-fetch=LEVEL     fetch only on initial access, higher LEVEL means finer granularity\n");
-	printf("    --read-ahead=N         number of megabytes to read ahead of the requested pieces\n");
+	printf("    --version -v                show version information\n");
+	printf("    --help -h                   show this message\n");
+	printf("    --help-fuse                 print all fuse options\n");
+	printf("    --browse-only -b            download metadata only\n");
+	printf("    --keep -k                   keep files after unmount\n");
+	printf("    --silent -s                 do not create logs\n");
+	printf("    --utp-only                  do not use TCP\n");
+	printf("    --data-directory=DIR -d DIR directory in which to put btfs data\n");
+	printf("    --min-port=N                start of listen port range\n");
+	printf("    --max-port=N                end of listen port range\n");
+	printf("    --max-download-rate=N       max download rate (in kB/s)\n");
+	printf("    --max-upload-rate=N         max upload rate (in kB/s)\n");
+	printf("    --lazy-fetch=LEVEL          fetch only on initial access, higher LEVEL means finer granularity\n");
+	printf("    --read-ahead=N              number of megabytes to read ahead of the requested pieces\n");
 }
 
 int
