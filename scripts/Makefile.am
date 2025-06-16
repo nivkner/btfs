@@ -1,1 +1,1 @@
-dist_bin_SCRIPTS = btplay
+dist_bin_SCRIPTS =
