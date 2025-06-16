@@ -51,6 +51,9 @@ fetch only on initial access, higher LEVEL means finer granularity:
   - 0 all files are prefetched eagerly.
   - 1 an entire file is prefetched on first access.
   - 2 only the required pieces from the file are fetched on every access.
+.TP
+\fB\-\-read-ahead=\fIN\fR
+number of megabytes to read ahead of the requested pieces
 .SH EXAMPLES
 mounting a torrent file:
   btfs video.torrent ~/mnt
